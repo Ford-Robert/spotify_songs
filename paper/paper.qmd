@@ -1,215 +1,117 @@
 ---
-title: "My title"
-subtitle: "My subtitle if needed"
+title: "Spotify Song Data Analysis"
+subtitle: "An investigation into how songs differ by artist"
 author: 
-  - First author
-  - Another author
-thanks: "Code and data are available at: LINK."
+  - Arav Sri Agarwal
+  - Robert Ford
+  - Marzia Zaidi
+  - Uma Sadhwani
+
+thanks: "Code and data are available at: https://github.com/Ford-Robert/spotify_songs"
 date: today
-date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "This paper analyzes Spotify song data to investigate how musical characteristics, such as valence and danceability, differ between three artists: Arctic Monkeys, Fred again.., and The Strokes. Using data retrieved from the Spotify API and analyzed in R, trends in emotional tone and danceability over time are visualized for each artist. The results show unique patterns in music evolution, with Fred again.. exhibiting the most dynamic changes, while Arctic Monkeys and The Strokes display more stable trajectories. These findings highlight the relationship between a song’s emotional positivity and its physical dance appeal."
 format: pdf
 number-sections: true
 bibliography: references.bib
 ---
 
-```{r}
-#| include: false
-#| warning: false
+```{r setup, include=FALSE}
 #| message: false
+#| echo: false
+#| warning: false
 
 library(tidyverse)
-library(palmerpenguins)
+library(ggplot2)
+```
+
+
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+fredagain <- read_csv(here::here("data/fred_data.csv"))
+the_strokes <- read_csv(here::here("data/strokes_data.csv"))
+arctic_monkeys <- read_csv(here::here("data/monkeys_data.csv"))
 ```
 
 
 # Introduction
-
-You can and should cross-reference sections and sub-sections. We use @citeR and @rohan.
-
-The remainder of this paper is structured as follows. @sec-data....
+Data Tools
+The dataset utilized in this study was analyzed using R (@citeR) and retrieved via the Spotify API (@citespotify). Data handling and analysis were facilitated through R packages such as Tidyverse (@citetidy) which streamlined the data processing and reporting workflow.
 
 
 
 # Data {#sec-data}
 
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
+For artists like The Strokes, Arctic Monkeys, and Fred Again, plotting valence against album release dates demonstrates intriguing patterns in their music evolution over time. Valence, a metric for a song's musical positivist, can reveal changes in the tone and atmosphere of an artist's work. 
 
 ```{r}
-#| label: fig-bills
-#| fig-cap: Bills of penguins
-#| echo: false
-
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
-  theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
-```
-
-Talk more about it.
-
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
-
-```{r}
-#| label: fig-planes
-#| fig-cap: Relationship between wing length and width
+#| label: valenc-artists
+#| fig-cap: Valence of Artists
 #| echo: false
 #| warning: false
 #| message: false
 
-analysis_data <- read_csv(here::here("data/analysis_data/analysis_data.csv"))
 
-analysis_data |> 
-  ggplot(aes(x = width, y = length)) +
-  geom_point(alpha = 0.8) +
-  theme_minimal() +
-  labs(x = "Wing width (mm)",
-       y = "Wing length (mm)")
+rbind(fredagain, the_strokes, arctic_monkeys) |> 
+  select(artist_name, album_release_date, valence) |> 
+  mutate(album_release_date = ymd(album_release_date)) |> 
+  ggplot(aes( x = album_release_date, y = valence, color = artist_name)) + 
+  geom_point(alpha = 0.3) + 
+  geom_smooth() + 
+  theme_minimal() + 
+  facet_wrap(facets = vars(artist_name), dir = "v") + 
+  labs( 
+    x = "Album release date", y = "Valence", 
+    color = "Artist") + scale_color_brewer(palette = "Set1") + theme(legend.position = "bottom")
 ```
+This graph visualizes the valence of songs by three artists- Arctic Monkeys, Fred again.., and The Strokes- over time, based on Spotify data. The y-axis represents the valence score, ranging from 0 (negative or sad) to 1 (positive or happy), while the x-axis indicates the album release dates. Each artist's data is represented in different colors: red for Arctic Monkeys, blue for Fred again.., and green for The Strokes.
 
-Talk way more about it. 
+For Arctic Monkeys, the trend shows a relatively stable valence with a slight decrease in recent years, indicating a consistent but gradually less positive tone in their music. Fred again.. has a more dynamic pattern, with significant dips and rises in valence, especially a noticeable increase towards the latest releases, suggesting a shift toward more positive tracks. The Strokes display a downward trend in valence from their earlier works, with a slight increase in positivity in the most recent albums, suggesting a return to a more upbeat tone.
 
+Overall, the graph highlights the distinct trajectories in musical mood evolution for each artist, with Fred again.. showing the most significant changes, while Arctic Monkeys and The Strokes exhibit more subtle shifts.
 
+Following the exploration of valence across three prominent artists' music over time, this second graph delves into another vital aspect of their tracks: danceability. Similar to valence, danceability is a measure derived from Spotify's data, encapsulating how suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity. The graph visualizes danceability trends for Arctic Monkeys, Fred again.., and The Strokes, using a color-coded scheme similar to the valence graph for easy comparison.
 
-# Model
-
-The goal of our modelling strategy is twofold. Firstly,...
-
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
-
-## Model set-up
-
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
-
-\begin{align} 
-y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \alpha + \beta_i + \gamma_i\\
-\alpha &\sim \mbox{Normal}(0, 2.5) \\
-\beta &\sim \mbox{Normal}(0, 2.5) \\
-\gamma &\sim \mbox{Normal}(0, 2.5) \\
-\sigma &\sim \mbox{Exponential}(1)
-\end{align}
-
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
-
-
-### Model justification
-
-We expect a positive relationship between the size of the wings and time spent aloft. In particular...
-
-We can use maths by including latex between dollar signs, for instance $\theta$.
-
-
-# Results
-
-Our results are summarized in @tbl-modelresults.
 
 ```{r}
+#| label: dance-artists
+#| fig-cap: Danceability of Artists
 #| echo: false
-#| eval: true
 #| warning: false
 #| message: false
 
-library(rstanarm)
 
-first_model <-
-  readRDS(file = here::here("models/first_model.rds"))
+rbind(fredagain, the_strokes, arctic_monkeys) |> 
+  select(artist_name, album_release_date, danceability) |> 
+  mutate(album_release_date = ymd(album_release_date)) |> 
+  ggplot(aes(x = album_release_date, y = danceability, color = artist_name)) + 
+  geom_point(alpha = 0.3) + 
+  geom_smooth() + 
+  theme_minimal() + 
+  facet_wrap(facets = vars(artist_name), dir = "v") + 
+  labs( 
+    x = "Album release date", y = "Danceability", 
+    color = "Artist") + 
+  scale_color_brewer(palette = "Set1") + 
+  theme(legend.position = "bottom")
+
 ```
+The danceability graph shows somewhat consistent patterns with the previously analyzed valence trends, reflecting the relationship between a song's emotional positivity and its dance appeal. Arctic Monkeys' music exhibits a relatively stable danceability with minor fluctuations, staying consistently within the middle range. This trend closely mirrors their valence graph, suggesting a stable musical style over time that balances emotional tone with danceability.
 
-```{r}
-#| echo: false
-#| eval: true
-#| label: tbl-modelresults
-#| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
-#| warning: false
+Fred again.., known for more electronically influenced music, shows a dramatic shift in danceability, particularly with a noticeable increase in recent years. This increase parallels their valence trend, indicating a move towards more uplifting and rhythmically engaging music.
+The Strokes show a steady danceability score that slightly decreases before rising again in recent years. This subtle trend also aligns with their valence pattern, hinting that their music maintains a steady groove even as the emotional content varies slightly.
 
-modelsummary::modelsummary(
-  list(
-    "First model" = first_model
-  ),
-  statistic = "mad",
-  fmt = 2
-)
-```
-
-
-
-
-# Discussion
-
-## First discussion point {#sec-first-point}
-
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
-
-## Second discussion point
-
-## Third discussion point
-
-## Weaknesses and next steps
-
-Weaknesses and next steps should also be included.
+Comparing the valence and danceability graphs, it's apparent that there's a significant overlap in trends for each artist, suggesting that tracks perceived as more positive are often also more danceable. This correlation underscores the intertwined nature of musical emotion and physical expression, where happier songs tend to invite more physical engagement through dance.
 
 \newpage
 
-\appendix
+# Appendix
 
-# Appendix {-}
+How to extract 2024 artist data, from Spotify API:
 
+First, log onto https://developer.spotify.com. Log in using your Spotify account username and password. Once you are logged in, click on your account (the button is located in the top right corner of the webpage). Then from the dropdown menu, click “Dashboard”. From your dashboard, click the “Create app” button. Then, fill in the “App Name”, “App Description”, “Redirect URIs”, and check the checkbox at the end to agree with Spotify's Developer Terms of Service and Design Guidelines. The other fields are not mandatory.
 
-# Additional data details
-
-# Model details {#sec-model-details}
-
-## Posterior predictive check
-
-In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
-
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
-
-```{r}
-#| eval: true
-#| echo: false
-#| message: false
-#| warning: false
-#| label: fig-ppcheckandposteriorvsprior
-#| layout-ncol: 2
-#| fig-cap: "Examining how the model fits, and is affected by, the data"
-#| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
-
-pp_check(first_model) +
-  theme_classic() +
-  theme(legend.position = "bottom")
-
-posterior_vs_prior(first_model) +
-  theme_minimal() +
-  scale_color_brewer(palette = "Set1") +
-  theme(legend.position = "bottom") +
-  coord_flip()
-```
-
-## Diagnostics
-
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
-
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
-
-```{r}
-#| echo: false
-#| eval: true
-#| message: false
-#| warning: false
-#| label: fig-stanareyouokay
-#| fig-cap: "Checking the convergence of the MCMC algorithm"
-#| fig-subcap: ["Trace plot", "Rhat plot"]
-#| layout-ncol: 2
-
-plot(first_model, "trace")
-
-plot(first_model, "rhat")
-```
 
 
 
