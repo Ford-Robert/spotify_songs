@@ -37,7 +37,7 @@ arctic_monkeys <- read_csv(here::here("data/monkeys_data.csv"))
 
 # Introduction
 Data Tools
-The dataset utilized in this study was analyzed using R (@citeR) and retrieved via the Spotify API (@citespotify). Data handling and analysis were facilitated through R packages such as Tidyverse (@citetidy) which streamlined the data processing and reporting workflow.
+The dataset utilized in this study was analyzed using R (@citeR) and retrieved via the Spotify API (@citeSpotify). Data handling and analysis were facilitated through R packages such as Tidyverse (@citeTidy) which streamlined the data processing and reporting workflow.
 
 
 
@@ -116,7 +116,6 @@ First, log onto https://developer.spotify.com. Log in using your Spotify account
 
 
 \newpage
-
 
 # References
 
