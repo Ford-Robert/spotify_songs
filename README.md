@@ -16,4 +16,4 @@ The repo is structured as:
 
 ## Statement on LLM usage
 
-Most of the Text was written using ChatGPT4o
+Most of the Text was written using ChatGPT4o, and the full text logs can be found in `other/llm`
